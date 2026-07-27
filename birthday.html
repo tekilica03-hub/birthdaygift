@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Much Do You Love Me? 💕</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFF3EE;
+    --blush:#FFD9E3;
+    --rose:#FF8FA8;
+    --berry:#D6446D;
+    --deep:#7A2E43;
+    --gold:#F6C453;
+    --shadow: 0 20px 45px rgba(122,46,67,0.18);
+  }
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0; min-height:100%;
+    font-family:'Quicksand', sans-serif;
+    color:var(--deep);
+    background: linear-gradient(160deg, var(--cream) 0%, var(--blush) 55%, #FFC9D8 100%);
+    overflow-x:hidden;
+  }
+  h1,h2{
+    font-family:'Dancing Script', cursive;
+    font-weight:700;
+  }
+  /* ---------- floating hearts background ---------- */
+  .hearts-bg{
+    position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
+  }
+  .floating-heart{
+    position:absolute; bottom:-10%;
+    color:var(--rose); opacity:0.35;
+    animation-name: floatUp;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    user-select:none;
+  }
+  @keyframes floatUp{
+    0%{ transform: translateY(0) rotate(0deg); opacity:0; }
+    10%{ opacity:0.5; }
+    90%{ opacity:0.35; }
+    100%{ transform: translateY(-115vh) rotate(25deg); opacity:0; }
+  }
+  /* ---------- page/section handling ---------- */
+  .page{
+    position:relative; z-index:1;
+    min-height:100vh;
+    display:none;
+    align-items:center; justify-content:center;
+    flex-direction:column;
+    padding:40px 20px;
+    animation: fadeIn 0.6s ease;
+  }
+  .page.active{ display:flex; }
+  @keyframes fadeIn{
+    from{ opacity:0; transform: translateY(14px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+  .card{
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(6px);
+    border-radius: 32px;
+    box-shadow: var(--shadow);
+    padding: 48px 40px;
+    max-width: 560px;
+    width:100%;
+    text-align:center;
+    border: 2px solid rgba(255,255,255,0.6);
+  }
+  h1{ font-size: 2.6rem; margin: 0 0 10px; color: var(--berry); }
+  p{ line-height:1.6; }
+  /* ---------- meter page ---------- */
+  .meter-heart{
+    font-size: 4rem;
+    margin: 10px 0;
+    transition: transform 0.2s ease;
+  }
+  .reaction{
+    min-height: 34px;
+    font-size: 1.15rem;
+    font-weight:600;
+    color: var(--berry);
+    margin-bottom: 22px;
+    transition: all 0.2s ease;
+  }
+  /* ---------- RAINBOW-SHAPED slider ---------- */
+  .curve-track{
+    position:relative;
+    width:100%;
+    aspect-ratio: 300 / 130;
+    margin: 6px 0 4px;
+    touch-action: pan-y;
+  }
+  .curve-track svg{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    overflow: visible;
+  }
+  .curve-track .curve-base{
+    fill:none;
+    stroke:#EADCE0;
+    stroke-width:8;
+    stroke-linecap:round;
+  }
+  .curve-track .curve-fill{
+    fill:none;
+    stroke: url(#rainbowGradient);
+    stroke-width:8;
+    stroke-linecap:round;
+  }
+  .curve-track input[type="range"]{
+    -webkit-appearance:none;
+    appearance:none;
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    margin:0;
+    background:transparent;
+    outline:none;
+    cursor:pointer;
+    opacity:0;
+    z-index:3;
+  }
+  .curve-track input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:36px; height:36px;
+  }
+  .curve-track input[type="range"]::-moz-range-thumb{
+    width:36px; height:36px;
+    border:none;
+    background:transparent;
+  }
+  .curve-thumb{
+    position:absolute;
+    width:28px; height:28px;
+    border-radius:50%;
+    background: var(--berry);
+    border:4px solid #fff;
+    box-shadow:0 3px 10px rgba(0,0,0,0.28);
+    transform: translate(-50%,-50%);
+    left:0; top:50%;
+    z-index:2;
+    pointer-events:none;
+    transition: background 0.2s ease;
+  }
+  .slider-labels{
+    display:flex; justify-content:space-between;
+    font-size:0.85rem; color:#a3768a; margin-bottom: 6px;
+  }
+  .rainbow-under{
+    width: 100%;
+    height: 14px;
+    border-radius: 50px;
+    background: linear-gradient(
+      to right,
+      #FF6B9D 0%,
+      #FF8E53 18%,
+      #FFD56B 36%,
+      #7ED957 54%,
+      #5B9DFF 72%,
+      #C77DFF 100%
+    );
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-top: 2px;
+  }
+
+  /* ---------- ENVELOPE PAGE ---------- */
+  .envelope-stage{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap: 18px;
+    position: relative;
+    min-height: 320px;
+  }
+  .envelope-stage .tap-hint{
+    font-size:0.95rem;
+    color:#a3768a;
+    margin:0;
+    animation: hintPulse 1.6s ease-in-out infinite;
+    transition: opacity 0.3s ease;
+  }
+  .envelope-stage.opened .tap-hint{
+    opacity: 0;
+  }
+  @keyframes hintPulse{
+    0%,100%{ opacity:0.6; } 50%{ opacity:1; }
+  }
+  .envelope{
+    position:relative;
+    width:220px;
+    height:150px;
+    cursor:pointer;
+    perspective: 800px;
+    animation: envBounce 1.5s ease-in-out infinite;
+    z-index: 2;
+  }
+  .envelope.opened{ animation:none; }
+  @keyframes envBounce{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(-10px); }
+  }
+  .envelope .body{
+    position:absolute;
+    inset:0;
+    background: var(--rose);
+    border-radius: 12px;
+    box-shadow: 0 14px 28px rgba(122,46,67,0.3);
+    overflow:hidden;
+    z-index:1;
+  }
+  .envelope .body::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:62%;
+    background:
+      linear-gradient(135deg, transparent 48%, rgba(0,0,0,0.08) 50%),
+      linear-gradient(-135deg, transparent 48%, rgba(0,0,0,0.08) 50%);
+  }
+  .envelope .flap{
+    position:absolute;
+    top:0;
+    left:50%;
+    width:0; height:0;
+    border-left:110px solid transparent;
+    border-right:110px solid transparent;
+    border-top:78px solid var(--berry);
+    transform: translateX(-50%);
+    transform-origin: top center;
+    transform-style: preserve-3d;
+    transition: transform 0.75s cubic-bezier(.68,-0.35,.27,1.25);
+    z-index:3;
+  }
+  .envelope .seal{
+    position:absolute;
+    top:42px;
+    left:50%;
+    transform: translate(-50%,-50%);
+    font-size:1.9rem;
+    z-index:4;
+    transition: opacity 0.3s ease;
+  }
+  .envelope.opened .flap{
+    transform: translateX(-50%) rotateX(180deg);
+  }
+  .envelope.opened .seal{
+    opacity:0;
+  }
+
+  .passed-card{
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    width: 240px;
+    background: #FFFBF6;
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(122,46,67,0.25);
+    padding: 28px 22px;
+    text-align: center;
+    font-family: 'Dancing Script', cursive;
+    color: var(--berry);
+    font-size: 1.35rem;
+    line-height: 1.4;
+    opacity: 0;
+    z-index: 5;
+    pointer-events: none;
+    transform: translate(-50%, 70px);
+  }
+  .passed-card.show{
+    animation: cardEntrance 1.1s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  @keyframes cardEntrance{
+    0%{
+      opacity: 0;
+      transform: translate(-50%, 70px);
+    }
+    45%{
+      opacity: 1;
+      transform: translate(-50%, -25px);
+    }
+    100%{
+      opacity: 1;
+      transform: translate(-50%, 40px);
+    }
+  }
+
+  /* ---------- gift selection page ---------- */
+  .gifts{
+    display:flex; gap:28px; justify-content:center; flex-wrap:wrap;
+    margin-top: 32px;
+  }
+  .gift{
+    background: transparent;
+    border: none;
+    padding: 0;
+    width: 130px;
+    cursor:pointer;
+    transition: transform 0.25s ease;
+    text-align: center;
+  }
+  .gift:hover{
+    transform: translateY(-10px) scale(1.05);
+  }
+  .gift p{
+    margin: 12px 0 0;
+    font-weight:600;
+    color:var(--berry);
+    font-size: 0.95rem;
+  }
+
+  /* CSS Gift Box */
+  .gift-box{
+    position: relative;
+    width: 90px;
+    height: 80px;
+    margin: 0 auto;
+  }
+  .gift-box .box{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 90px;
+    height: 55px;
+    border-radius: 6px 6px 8px 8px;
+    box-shadow: 0 6px 14px rgba(122,46,67,0.2);
+  }
+  .gift-box .lid{
+    position: absolute;
+    top: 0;
+    left: -4px;
+    width: 98px;
+    height: 22px;
+    border-radius: 6px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  }
+  .gift-box .ribbon-v{
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 100%;
+    z-index: 2;
+  }
+  .gift-box .ribbon-h{
+    position: absolute;
+    top: 38px;
+    left: 0;
+    width: 100%;
+    height: 14px;
+    z-index: 2;
+  }
+  .gift-box .bow{
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 18px;
+    z-index: 3;
+  }
+  .gift-box .bow::before,
+  .gift-box .bow::after{
+    content: "";
+    position: absolute;
+    top: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50% 50% 0 50%;
+    transform: rotate(45deg);
+  }
+  .gift-box .bow::before{ left: -2px; }
+  .gift-box .bow::after{ right: -2px; transform: rotate(-45deg) scaleX(-1); }
+
+  .gift-box.g1 .box{ background: #FF8FA8; }
+  .gift-box.g1 .lid{ background: #FF6B9D; }
+  .gift-box.g1 .ribbon-v,
+  .gift-box.g1 .ribbon-h{ background: #FFE4EC; }
+  .gift-box.g1 .bow::before,
+  .gift-box.g1 .bow::after{ background: #FFE4EC; }
+
+  .gift-box.g2 .box{ background: #C9A0FF; }
+  .gift-box.g2 .lid{ background: #B07CFF; }
+  .gift-box.g2 .ribbon-v,
+  .gift-box.g2 .ribbon-h{ background: #F3E8FF; }
+  .gift-box.g2 .bow::before,
+  .gift-box.g2 .bow::after{ background: #F3E8FF; }
+
+  .gift-box.g3 .box{ background: #FFB347; }
+  .gift-box.g3 .lid{ background: #FF9F1C; }
+  .gift-box.g3 .ribbon-v,
+  .gift-box.g3 .ribbon-h{ background: #FFF0D6; }
+  .gift-box.g3 .bow::before,
+  .gift-box.g3 .bow::after{ background: #FFF0D6; }
+
+  /* ---------- back button ---------- */
+  .back-btn{
+    position:absolute; top:24px; left:24px;
+    background: rgba(255,255,255,0.75);
+    border: 2px solid var(--blush);
+    color: var(--berry);
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor:pointer;
+    z-index:5;
+  }
+  .back-btn:hover{ background:#fff; }
+
+  /* ---------- PROPER FLOWER BOUQUET ---------- */
+  .bouquet-wrap{
+    position:relative;
+    width:100%; max-width: 640px;
+    min-height: 560px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .bouquet{
+    position:relative;
+    width: 260px;
+    height: 320px;
+    z-index: 2;
+  }
+  .stem{
+    position:absolute;
+    bottom: 0;
+    width: 5px;
+    background: #5B8C5A;
+    border-radius: 4px;
+    transform-origin: bottom center;
+  }
+  .stem.s1{ left: 50%; height: 160px; transform: translateX(-50%) rotate(-8deg); }
+  .stem.s2{ left: 42%; height: 150px; transform: rotate(-18deg); }
+  .stem.s3{ left: 58%; height: 150px; transform: rotate(14deg); }
+  .stem.s4{ left: 35%; height: 140px; transform: rotate(-28deg); }
+  .stem.s5{ left: 65%; height: 140px; transform: rotate(24deg); }
+  .stem.s6{ left: 48%; height: 155px; transform: translateX(-50%) rotate(4deg); }
+
+  .leaf{
+    position:absolute;
+    width: 28px;
+    height: 16px;
+    background: #6FA36F;
+    border-radius: 0 80% 0 80%;
+    bottom: 70px;
+  }
+  .leaf.l1{ left: 30px; transform: rotate(-40deg); }
+  .leaf.l2{ right: 30px; transform: rotate(40deg) scaleX(-1); }
+  .leaf.l3{ left: 50px; bottom: 95px; transform: rotate(-25deg); }
+  .leaf.l4{ right: 50px; bottom: 90px; transform: rotate(30deg) scaleX(-1); }
+
+  .flower{
+    position:absolute;
+    width: 58px;
+    height: 58px;
+  }
+  .flower .petal{
+    position:absolute;
+    width: 28px;
+    height: 36px;
+    border-radius: 50% 50% 50% 50%;
+    top: 50%;
+    left: 50%;
+    transform-origin: center bottom;
+  }
+  .flower .center{
+    position:absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--gold);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    z-index: 3;
+    box-shadow: 0 0 0 3px rgba(246,196,83,0.35);
+  }
+
+  .f1{ left: 18px;  bottom: 155px; }
+  .f2{ left: 95px;  bottom: 195px; }
+  .f3{ left: 160px; bottom: 150px; }
+  .f4{ left: 55px;  bottom: 175px; }
+  .f5{ left: 130px; bottom: 170px; }
+  .f6{ left: 85px;  bottom: 145px; }
+
+  .f1 .petal{ background: #FF8FA8; }
+  .f2 .petal{ background: #FF6B9D; }
+  .f3 .petal{ background: #E85A8C; }
+  .f4 .petal{ background: #FFB0C6; }
+  .f5 .petal{ background: #FF9BB8; }
+  .f6 .petal{ background: #FF7AA2; }
+
+  .love-word{
+    position:absolute;
+    font-family:'Dancing Script', cursive;
+    font-size: 1.35rem;
+    color: var(--berry);
+    background: #fff;
+    padding: 8px 16px;
+    border-radius: 16px;
+    box-shadow: 0 6px 16px rgba(122,46,67,0.18);
+    white-space:nowrap;
+  }
+  .w1{ top:6%; left:2%; transform: rotate(-8deg); }
+  .w2{ top:2%; right:0%; transform: rotate(6deg); }
+  .w3{ bottom:22%; left:0%; transform: rotate(5deg); }
+  .w4{ bottom:14%; right:2%; transform: rotate(-6deg); }
+  .w5{ top:42%; left:-4%; transform: rotate(-4deg); }
+  .w6{ top:46%; right:-6%; transform: rotate(4deg); }
+  .w7{ bottom:2%; left:50%; transform: translateX(-50%) rotate(0deg); }
+
+  /* ---------- playlist page ---------- */
+  .playlist-card{ max-width: 480px; text-align:left; }
+  .playlist-card h1{ text-align:center; }
+  .subtitle{ text-align:center; color:#a3768a; font-size:0.9rem; margin-top:-6px; margin-bottom: 20px; }
+  .playlist{ list-style:none; margin:0; padding:0; }
+  .playlist li{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    padding: 14px 10px;
+    border-radius: 14px;
+    transition: background 0.15s ease;
+  }
+  .playlist li:hover{ background: rgba(255,143,168,0.15); }
+  .track-num{
+    width:26px;
+    text-align:center;
+    font-weight:700;
+    color: var(--rose);
+    padding-top: 2px;
+  }
+  .track-info{ flex:1; display:flex; flex-direction:column; gap: 4px; }
+  .track-title{ font-weight:600; font-size: 1rem; }
+  .track-artist{ font-size:0.8rem; color:#a3768a; }
+  .track-lyric{
+    font-size: 0.88rem;
+    color: var(--berry);
+    font-style: italic;
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  /* ---------- letter page ---------- */
+  .envelope-wrap{ max-width: 520px; width:100%; }
+  .letter{
+    background: #FFFBF6;
+    border-radius: 18px;
+    padding: 44px 36px;
+    box-shadow: var(--shadow);
+    text-align:left;
+    position:relative;
+    border: 2px dashed var(--rose);
+  }
+  .letter::before{
+    content:"💌";
+    position:absolute; top:-26px; left:50%; transform:translateX(-50%);
+    font-size:2.2rem;
+  }
+  .letter p{ margin: 0 0 16px; }
+  .letter .sign{ font-family:'Dancing Script', cursive; font-size:1.6rem; color: var(--berry); }
+  @media (max-width: 480px){
+    .card{ padding: 34px 22px; }
+    h1{ font-size: 2.1rem; }
+    .bouquet-wrap{ min-height: 480px; }
+    .love-word{ font-size: 1.1rem; padding:6px 12px; }
+    .envelope{ width:190px; height:130px; }
+    .envelope .flap{
+      border-left:95px solid transparent;
+      border-right:95px solid transparent;
+      border-top:68px solid var(--berry);
+    }
+    .passed-card{ width: 210px; font-size: 1.2rem; }
+    .gifts{ gap: 18px; }
+    .gift{ width: 110px; }
+    .gift-box{ width: 78px; height: 70px; }
+    .gift-box .box{ width: 78px; height: 48px; }
+    .gift-box .lid{ width: 86px; left: -4px; }
+  }
+</style>
+</head>
+<body>
+<div class="hearts-bg" id="heartsBg"></div>
+
+<!-- PAGE 1: LOVE METER -->
+<section class="page active" id="page-meter">
+  <div class="card">
+    <h1>How much do you love me?</h1>
+    <div class="meter-heart" id="meterHeart">🤍</div>
+    <p class="reaction" id="reactionText">Slide to answer honestly...</p>
+    <div class="curve-track" id="curveTrack">
+      <svg viewBox="0 0 300 130" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="rainbowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stop-color="#FF6B9D"/>
+            <stop offset="20%"  stop-color="#FF8E53"/>
+            <stop offset="40%"  stop-color="#FFD56B"/>
+            <stop offset="60%"  stop-color="#7ED957"/>
+            <stop offset="80%"  stop-color="#5B9DFF"/>
+            <stop offset="100%" stop-color="#C77DFF"/>
+          </linearGradient>
+        </defs>
+        <path class="curve-base" d="M 15,110 A 135,95 0 0 1 285,110"></path>
+        <path class="curve-fill" id="curveFill" d="M 15,110 A 135,95 0 0 1 285,110"></path>
+      </svg>
+      <div class="curve-thumb" id="curveThumb"></div>
+      <input type="range" id="loveSlider" min="0" max="100" value="0">
+    </div>
+    <div class="slider-labels">
+      <span>don't love at all</span>
+      <span>love very much</span>
+    </div>
+    <div class="rainbow-under"></div>
+  </div>
+</section>
+
+<!-- PAGE: ENVELOPE -->
+<section class="page" id="page-envelope">
+  <div class="envelope-stage" id="envelopeStage">
+    <p class="tap-hint">tap the envelope to open it 💌</p>
+
+    <div class="envelope" id="envelope">
+      <div class="flap"></div>
+      <div class="seal">💌</div>
+      <div class="body"></div>
+    </div>
+
+    <div class="passed-card" id="passedCard">
+      you passed the love test! 💕
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 2: PASSED + GIFT PICKER -->
+<section class="page" id="page-pass">
+  <div class="card">
+    <h1>You passed the love test! 💕</h1>
+    <p>Now pick a gift to open...</p>
+    <div class="gifts">
+      <div class="gift" data-target="page-flowers">
+        <div class="gift-box g1">
+          <div class="lid"></div>
+          <div class="box"></div>
+          <div class="ribbon-v"></div>
+          <div class="ribbon-h"></div>
+          <div class="bow"></div>
+        </div>
+        <p>Gift One</p>
+      </div>
+      <div class="gift" data-target="page-music">
+        <div class="gift-box g2">
+          <div class="lid"></div>
+          <div class="box"></div>
+          <div class="ribbon-v"></div>
+          <div class="ribbon-h"></div>
+          <div class="bow"></div>
+        </div>
+        <p>Gift Two</p>
+      </div>
+      <div class="gift" data-target="page-letter">
+        <div class="gift-box g3">
+          <div class="lid"></div>
+          <div class="box"></div>
+          <div class="ribbon-v"></div>
+          <div class="ribbon-h"></div>
+          <div class="bow"></div>
+        </div>
+        <p>Gift Three</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 3: FLOWER BOUQUET -->
+<section class="page" id="page-flowers">
+  <button class="back-btn" data-target="page-pass">← Back</button>
+  <div class="bouquet-wrap">
+    <div class="love-word w1">you make my heart bloom</div>
+    <div class="love-word w2">every day with you is my favorite</div>
+    <div class="love-word w3">you're my sunshine</div>
+    <div class="love-word w4">forever grateful for you</div>
+    <div class="love-word w5">my favorite person</div>
+    <div class="love-word w6">home is wherever you are</div>
+    <div class="love-word w7">I love you so much</div>
+
+    <div class="bouquet">
+      <div class="stem s1"></div>
+      <div class="stem s2"></div>
+      <div class="stem s3"></div>
+      <div class="stem s4"></div>
+      <div class="stem s5"></div>
+      <div class="stem s6"></div>
+
+      <div class="leaf l1"></div>
+      <div class="leaf l2"></div>
+      <div class="leaf l3"></div>
+      <div class="leaf l4"></div>
+
+      <div class="flower f1">
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(0deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(72deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(144deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(216deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(288deg);"></div>
+        <div class="center"></div>
+      </div>
+      <div class="flower f2">
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(0deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(72deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(144deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(216deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(288deg);"></div>
+        <div class="center"></div>
+      </div>
+      <div class="flower f3">
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(0deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(72deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(144deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(216deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(288deg);"></div>
+        <div class="center"></div>
+      </div>
+      <div class="flower f4">
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(0deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(72deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(144deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(216deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(288deg);"></div>
+        <div class="center"></div>
+      </div>
+      <div class="flower f5">
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(0deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(72deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(144deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(216deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(288deg);"></div>
+        <div class="center"></div>
+      </div>
+      <div class="flower f6">
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(0deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(72deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(144deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(216deg);"></div>
+        <div class="petal" style="transform:translate(-50%,-100%) rotate(288deg);"></div>
+        <div class="center"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 4: MUSIC PLAYLIST -->
+<section class="page" id="page-music">
+  <button class="back-btn" data-target="page-pass">← Back</button>
+  <div class="card playlist-card">
+    <h1>Songs That Remind Me of You 🎵</h1>
+    <p class="subtitle">Little pieces of lyrics I’d say to you 💕</p>
+    <ul class="playlist">
+      <li>
+        <span class="track-num">1</span>
+        <div class="track-info">
+          <span class="track-title">Mine</span>
+          <span class="track-artist">Taylor Swift</span>
+          <span class="track-lyric">“You are the best thing that's ever been mine”</span>
+        </div>
+      </li>
+      <li>
+        <span class="track-num">2</span>
+        <div class="track-info">
+          <span class="track-title">ONLY</span>
+          <span class="track-artist">LEEHI</span>
+          <span class="track-lyric">“You are my only, only, only”</span>
+        </div>
+      </li>
+      <li>
+        <span class="track-num">3</span>
+        <div class="track-info">
+          <span class="track-title">Always</span>
+          <span class="track-artist">Daniel Caesar</span>
+          <span class="track-lyric">“I just wanna keep you next to me… always”</span>
+        </div>
+      </li>
+      <li>
+        <span class="track-num">4</span>
+        <div class="track-info">
+          <span class="track-title">Mahika</span>
+          <span class="track-artist">Adie, Janine Berdin</span>
+          <span class="track-lyric">“Ikaw ang mahika, ikaw ang himala”</span>
+        </div>
+      </li>
+      <li>
+        <span class="track-num">5</span>
+        <div class="track-info">
+          <span class="track-title">Still Into You</span>
+          <span class="track-artist">Paramore</span>
+          <span class="track-lyric">“Some things never change… still into you”</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- PAGE 5: LOVE LETTER -->
+<section class="page" id="page-letter">
+  <button class="back-btn" data-target="page-pass">← Back</button>
+  <div class="envelope-wrap">
+    <div class="letter">
+      <p>My Forever Darling,</p>
+      <p>I wanted to say what you mean to me every day but it just doesn't seem like enough. At the end of a long day, you are the calm person; who I want to say all the little silly things to; and the person who makes a common thing memorable.</p>
+      <p>Thank you for being exactly who you are. I hope this simple little website made you smile, even just a little.</p>
+      <p>With all my love,</p>
+      <p class="sign">Your always be Darling</p>
+    </div>
+  </div>
+</section>
+
+<script>
+  // ---------- floating hearts ----------
+  const heartsBg = document.getElementById('heartsBg');
+  const heartEmojis = ['💗','💕','💓','💖','🤍'];
+  for(let i=0;i<22;i++){
+    const h = document.createElement('span');
+    h.className = 'floating-heart';
+    h.textContent = heartEmojis[Math.floor(Math.random()*heartEmojis.length)];
+    h.style.left = Math.random()*100 + 'vw';
+    h.style.fontSize = (14 + Math.random()*22) + 'px';
+    const duration = 9 + Math.random()*10;
+    h.style.animationDuration = duration + 's';
+    h.style.animationDelay = (Math.random()*duration) + 's';
+    heartsBg.appendChild(h);
+  }
+
+  // ---------- love meter ----------
+  const slider = document.getElementById('loveSlider');
+  const reactionText = document.getElementById('reactionText');
+  const meterHeart = document.getElementById('meterHeart');
+  const curveFill = document.getElementById('curveFill');
+  const curveThumb = document.getElementById('curveThumb');
+  const curveTrack = document.getElementById('curveTrack');
+  const envelope = document.getElementById('envelope');
+  const envelopeStage = document.getElementById('envelopeStage');
+  const passedCard = document.getElementById('passedCard');
+
+  const pathLen = curveFill.getTotalLength();
+  curveFill.style.strokeDasharray = pathLen;
+  curveFill.style.strokeDashoffset = pathLen;
+
+  const stages = [
+    { max: 9, text: "...that's it? 😢", heart: "🤍" },
+    { max: 24, text: "oh no, not much huh 😕", heart: "🤎" },
+    { max: 39, text: "hmm, warming up a little 😐", heart: "💛" },
+    { max: 54, text: "okay okay, getting there 🙂", heart: "🧡" },
+    { max: 69, text: "ooh I like where this is going 😊", heart: "💗" },
+    { max: 84, text: "yesss, that's more like it! 🥰", heart: "💓" },
+    { max: 99, text: "so much love!! 😍💕", heart: "💖" },
+    { max: 100, text: "MAXIMUM LOVE ACHIEVED!! 💘🔥", heart: "💝" },
+  ];
+
+  function positionThumb(percent){
+    const point = curveFill.getPointAtLength(pathLen * percent);
+    const rect = curveTrack.getBoundingClientRect();
+    const scaleX = rect.width / 300;
+    const scaleY = rect.height / 130;
+    curveThumb.style.left = (point.x * scaleX) + 'px';
+    curveThumb.style.top = (point.y * scaleY) + 'px';
+  }
+
+  function updateMeter(){
+    const val = Number(slider.value);
+    const percent = val / 100;
+    const stage = stages.find(s => val <= s.max);
+    reactionText.textContent = stage.text;
+    meterHeart.textContent = stage.heart;
+    meterHeart.style.transform = `scale(${1 + val/140})`;
+    curveFill.style.strokeDashoffset = pathLen * (1 - percent);
+    positionThumb(percent);
+
+    if(val >= 100){
+      setTimeout(() => goTo('page-envelope'), 450);
+    }
+  }
+
+  slider.addEventListener('input', updateMeter);
+  window.addEventListener('resize', () => positionThumb(Number(slider.value)/100));
+  updateMeter();
+
+  // ---------- envelope open + card entrance ----------
+  envelope.addEventListener('click', () => {
+    if(envelope.classList.contains('opened')) return;
+
+    envelope.classList.add('opened');
+    envelopeStage.classList.add('opened');
+
+    setTimeout(() => {
+      passedCard.classList.add('show');
+    }, 400);
+
+    setTimeout(() => goTo('page-pass'), 2400);
+  });
+
+  // ---------- page navigation ----------
+  function goTo(id){
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  document.querySelectorAll('.gift').forEach(g => {
+    g.addEventListener('click', () => goTo(g.dataset.target));
+  });
+  document.querySelectorAll('.back-btn').forEach(b => {
+    b.addEventListener('click', () => goTo(b.dataset.target));
+  });
+</script>
+</body>
+</html>
